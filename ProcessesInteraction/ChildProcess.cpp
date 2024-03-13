@@ -6,22 +6,14 @@
 
 using namespace std;
 
-int main1() {
+int main() {
 
     int value1, value2;
 
-    cout << GetStdHandle(STD_INPUT_HANDLE) << endl; 
-    cout << GetStdHandle(STD_OUTPUT_HANDLE) << endl; 
+    ReadFile(GetStdHandle(STD_INPUT_HANDLE), &value1, sizeof(value1), NULL, NULL);
+    ReadFile(GetStdHandle(STD_INPUT_HANDLE), &value2, sizeof(value2), NULL, NULL);
 
-  
-    ofstream output;
-    output.open("test.txt");
+    cout << "value1 + value2 = " << value1 + value2 << endl;
 
-    ReadFile(GetStdHandle(STD_INPUT_HANDLE));
-    output << 1;
-
-
-    output.close();
-    system("pause");
     return 0;
 }
