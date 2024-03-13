@@ -8,6 +8,7 @@ int main()
 	HANDLE hRead, hWrite;
 
 	SECURITY_ATTRIBUTES secAttr;
+	ZeroMemory(&secAttr, sizeof(secAttr));
 	secAttr.nLength = sizeof(secAttr);
 	secAttr.bInheritHandle = true;
 	secAttr.lpSecurityDescriptor = NULL;
@@ -15,6 +16,8 @@ int main()
 	if (!CreatePipe(&hRead, &hWrite, &secAttr, 0))
 	{
 		cout << "Error: The channel was not created";
+		CloseHandle(hRead);
+		CloseHandle(hWrite);
 		return 0;
 	}
 
@@ -22,11 +25,20 @@ int main()
 	STARTUPINFO sa;
 	ZeroMemory(&sa, sizeof(sa));
 	ZeroMemory(&pi, sizeof(pi));
+
 	sa.cb = sizeof(STARTUPINFO);
 	sa.dwFlags = STARTF_USESTDHANDLES;
 	sa.hStdInput = hRead;
 	sa.hStdError = GetStdHandle(STD_OUTPUT_HANDLE);
 	sa.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+
+	if (!CreateProcess(L"ChildProcess.exe", NULL, NULL, NULL, true, CREATE_NEW_CONSOLE, NULL, NULL, &sa, &pi))
+	{
+		cout << "Error: The Child process was not created" << endl;
+		CloseHandle(hRead);
+		CloseHandle(hWrite);
+		return 0;
+	}
 
 	int value1, value2;
 	cout << "Enter values:" << endl;
@@ -38,14 +50,9 @@ int main()
 	WriteFile(hWrite, &value1, sizeof(value1), NULL, NULL);
 	WriteFile(hWrite, &value2, sizeof(value2), NULL, NULL);
 
-	if (!CreateProcess(L"ChildProcess.exe", NULL, NULL, NULL, true, CREATE_NEW_CONSOLE, NULL, NULL, &sa, &pi))
-	{
-		cout << "Error: The Child process was not created" << endl;
-
-		return 0;
-	}
-
-
-
-
+	
+	system("pause");
+	TerminateProcess(pi.hProcess, 0);
+	CloseHandle(hRead);
+	CloseHandle(hWrite);
 };
